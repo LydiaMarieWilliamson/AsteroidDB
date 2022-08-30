@@ -1,6 +1,9 @@
 #ifndef OnceOnlyLog_h
 #define OnceOnlyLog_h
 
+extern int errorCount;
+extern FILE *dbf;
+
 int Random(int max);
 void LogError(char *msg);
 void LogError2(const char *msg1, const char *msg2);

@@ -15,8 +15,7 @@ int Random(int max) {
 
 // Log Single errors
 void LogError(char *msg) {
-   FILE *err;
-   err = fopen("ErrorLog.txt", "a");
+   FILE *err = fopen("ErrorLog.txt", "a");
    printf("%s\n", msg);
    fclose(err);
    errorCount++;
@@ -24,23 +23,28 @@ void LogError(char *msg) {
 
 // Log Errors with two parameters
 void LogError2(const char *msg1, const char *msg2) {
-   FILE *err;
-   err = fopen("ErrorLog.txt", "a");
+   FILE *err = fopen("ErrorLog.txt", "a");
    fprintf(err, "%s %s\n", msg1, msg2);
    fclose(err);
    errorCount++;
 }
 
 void l2(char *loc, char *msg) {
-//fprintf(dbf, "%s,%s\n", loc, msg);
+#if 0
+   fprintf(dbf, "%s,%s\n", loc, msg);
+#endif
 }
 
 void l(char *loc) {
-//fprintf(dbf, "%s\n", loc);
+#if 0
+   fprintf(dbf, "%s\n", loc);
+#endif
 }
 
 void ln(char *loc, char *msg, int n) {
-//fprintf(dbf, "%s,%s,%s\n", loc, msg, sltoa(n));
+#if 0
+   fprintf(dbf, "%s,%s,%s\n", loc, msg, sltoa(n));
+#endif
 }
 
 char *sltoa(int n) {
