@@ -1,4 +1,4 @@
-InitSetup failed to load mask number: bullet.msk
+InitSetup failed to load mask number: Pea.msk
 Mix_PlayChannel failed to play audio sound # 3
 Mix_PlayChannel failed to play audio sound # 3
 Mix_PlayChannel failed to play audio sound # 3

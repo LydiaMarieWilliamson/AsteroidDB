@@ -1,31 +1,19 @@
 #include "Timer.h"
 
 #if 1 // SDL-generic.
-static inline stopWatch PerformanceCounter(void) {
-   return SDL_GetTicks();
-}
-static inline stopWatch PerformanceFrequency(void) {
-   return (stopWatch) 1000;
-}
+static inline TimeT PerformanceCounter(void) { return SDL_GetTicks(); }
+static inline TimeT PerformanceFrequency(void) { return (TimeT)1000; }
 #else // Windows-tuned.
-static inline stopWatch PerformanceCounter(void) {
-   LARGE_INTEGER T;
-   QueryPerformanceCounter(&T);
-   return (stopWatch) T.QuadPart;
+static inline TimeT PerformanceCounter(void) {
+   LARGE_INTEGER T; QueryPerformanceCounter(&T);
+   return (TimeT)T.QuadPart;
 }
-static inline stopWatch PerformanceFrequency(void) {
-   LARGE_INTEGER F;
-   QueryPerformanceCounter(&F);
-   return (stopWatch) F.QuadPart;
+static inline TimeT PerformanceFrequency(void) {
+   LARGE_INTEGER F; QueryPerformanceFrequency(&F);
+   return (TimeT)F.QuadPart;
 }
 #endif
 
-stopWatch startTimer(void) {
-   return PerformanceCounter();
-}
+TimeT BegTimer(void) { return PerformanceCounter(); }
 
-double stopTimer(stopWatch timer) {
-   stopWatch time = PerformanceCounter() - timer;
-   stopWatch frequency = PerformanceFrequency();
-   return ((double)time/(double)frequency);
-}
+double EndTimer(TimeT T) { return (double)(PerformanceCounter() - T)/(double)PerformanceFrequency(); }

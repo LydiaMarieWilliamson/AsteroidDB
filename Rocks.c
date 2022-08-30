@@ -62,15 +62,15 @@
 #define MAXBULLETS MAXPLAYERBULLETS + (MAXBULLETSPERALIEN*MAXALIENS)
 
 // Texture indices
-#define PLBACKDROP 0
-#define TEXTTEXTURE 1
-#define TEXTUREPLAYERSHIP 2
-#define TEXTUREDEBUG 3
-#define TEXTUREASTEROID1 4 // 4,5,6,7
+#define TEXTUREASTEROID1 0 // 0, 1, 2, 3
+#define PLBACKDROP 4
+#define TEXTTEXTURE 5
+#define TEXTUREPLAYERSHIP 6
+#define TEXTUREDEBUG 7
 #define TEXTUREBULLET 8
 #define TEXTURESMALLSHIP 9
-#define TEXTUREEXPLOSION 10 // 10,11,12,13
-#define TEXTUREALIENSHIP 14
+#define TEXTUREALIENSHIP 10
+#define TEXTUREEXPLOSION 11 // 11, 12, 13, 14
 
 // sound indices
 #define THRUSTSOUND 0
@@ -208,13 +208,13 @@ char timebuff[50]; // used for timing
 char buffer[100], buffer2[100];
 float thrustx[24];
 float thrusty[24];
-byte bulletmask[1*3*3];
+byte bulletmask[3*3];
 byte plmask[24*64*64];
 byte a1mask[24*280*280];
 byte a2mask[24*140*140];
 byte a3mask[24*70*70];
 byte a4mask[24*35*35];
-byte alienmask[64*64];
+byte alienmask[1*64*64];
 
 // struct variables
 struct Cell cells[CELLX][CELLY];
@@ -228,18 +228,20 @@ struct Mix_Chunk *sounds[NUMSOUNDS];
 extern struct level levels[MAXLEVELS];
 struct HighScoreEntry highscores[NUMSCORES];
 
-stopWatch s;
+TimeT Ticks;
 
 // external variables
 extern int errorCount;
 extern FILE *dbf;
 
 // consts
-const char *texturenames[NUMTEXTURES] = { "Images/Space.png", "Images/Text.png", "Images/Ship.png", "Images/Debug.png",
-   "Images/Rock0.png", "Images/Rock1.png", "Images/Rock2.png", "Images/Rock3.png", "Images/Pea.png", "Images/Pod.png", "Images/Boom0.png",
-   "Images/Boom1.png", "Images/Boom2.png", "Images/Boom3.png", "Images/Alien.png"
+const char *texturenames[NUMTEXTURES] = {
+   "Images/Rock0.png", "Images/Rock1.png", "Images/Rock2.png", "Images/Rock3.png",
+   "Images/Space.png", "Images/Text.png", "Images/Ship.png", "Images/Debug.png",
+   "Images/Pea.png", "Images/Pod.png", "Images/Alien.png",
+   "Images/Boom0.png", "Images/Boom1.png", "Images/Boom2.png", "Images/Boom3.png"
 };
-const char *highscoreFN = { "HiScores.txt" };
+const char *highscoreFN = "HiScores.txt";
 const char *soundnames[NUMSOUNDS] = { "Sounds/Push.wav", "Sounds/Fire.wav", "Sounds/Boom0.wav", "Sounds/Boom1.wav" };
 
 const int explosionSizes[4] = { 128, 128, 128, 64 };
@@ -296,31 +298,19 @@ void InitThrustAngles() {
 }
 
 void processTexture(int texturenum, int size, char *filename) {
-   SDL_Texture *targettexture = SDL_CreateTexture(renderer,
-      SDL_PIXELFORMAT_ARGB8888,
-   //SDL_TEXTUREACCESS_STREAMING,
-      SDL_TEXTUREACCESS_TARGET,
-      size, size);
-
-   SDL_Rect src;
-   src.w = size;
-   src.h = size;
-   void *pixels;
-   src.y = 0;
-   int pitch, aw, ah;
-   int access;
+   SDL_Texture *targettexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888,/* SDL_TEXTUREACCESS_STREAMING, */SDL_TEXTUREACCESS_TARGET, size, size);
+   SDL_Rect src; src.w = size, src.h = size, src.y = 0;
    for (int i = 0; i < 24; i++) {
       src.x = i*size;
       SDL_SetRenderTarget(renderer, targettexture);
       SDL_RenderClear(renderer);
       SDL_RenderCopy(renderer, textures[texturenum], &src, NULL);
-      int success = SDL_QueryTexture(targettexture, NULL, &access, &aw, &ah);
-      success = SDL_LockTexture(targettexture, NULL, &pixels, &pitch);
-      Uint32 *upixels = (Uint32 *) pixels;
-      for (int y = 0; y < size; y++)
-         for (int x = 0; x < aw*ah; x++) {
-            Uint32 p = *upixels;
-         }
+      int access, aw, ah; (void)SDL_QueryTexture(targettexture, NULL, &access, &aw, &ah);
+      void *pixels; int pitch; (void)SDL_LockTexture(targettexture, NULL, &pixels, &pitch);
+      Uint32 *upixels = (Uint32 *)pixels;
+      for (int y = 0; y < size; y++) for (int x = 0; x < aw*ah; x++) {
+         Uint32 p = *upixels;
+      }
       SDL_SetRenderTarget(renderer, NULL);
       SDL_RenderCopy(renderer, targettexture, NULL, NULL);
       SDL_DestroyTexture(targettexture);
@@ -350,7 +340,8 @@ int LoadMasks() {
    if (!LoadMask("Masks/Rock1.msk", 140, 24, a2mask)) return 0;
    if (!LoadMask("Masks/Rock2.msk", 70, 24, a3mask)) return 0;
    if (!LoadMask("Masks/Alien.msk", 64, 1, alienmask)) return 0;
-   return LoadMask("Masks/Rock3.msk", 35, 24, a4mask);
+   if (!LoadMask("Masks/Rock3.msk", 35, 24, a4mask)) return 0;
+   return 1;
 }
 
 void ClearCellList() {
@@ -609,7 +600,7 @@ void UpdateCaption() {
 #ifdef TIMEGAMELOOP
    SetCaption(timebuff);
 #else
-   snprintf(buffer2, sizeof(buffer2), "%10.6f", stopTimer(s));
+   snprintf(buffer2, sizeof(buffer2), "%10.6f", EndTimer(Ticks));
    tickCount = SDL_GetTicks();
 
    if (tickCount - lastTick >= 1000) {
@@ -1180,6 +1171,7 @@ void AddAlienShip() {
    palien->type = tAlien;
    palien->r.y = (int)palien->y;
    palien->r.x = (int)palien->x;
+   palien->moveDir = 0;
    palien->xvel = (float)3 - Random(6);
    palien->yvel = (float)3 - Random(6);
    palien->r.w = ALIENSHIPWIDTH;
@@ -1591,11 +1583,11 @@ pbyte GetMask(int type, int rotation, int size) {
          }
       };
       case tBullet: // bullet
-         return bulletmask /* + offset */ ;
+         return bulletmask + offset;
       case tPlayer: // player
          return plmask + offset;
       case tAlien:
-         return alienmask /* + offset */ ;
+         return alienmask + offset;
    }
    return 0; // null - should never get here!
 }
@@ -1617,8 +1609,8 @@ int Overlap(pfirstpart object1, pfirstpart object2, SDL_Rect *rect, int *bangx, 
    int dir2 = object2->type == tBullet ? 0 : object2->rotdir;
    int size1 = object1->r.h;
    int size2 = object2->r.h;
-   pbyte pm1 = GetMask(object1->type, object1->rotdir, size1);
-   pbyte pm2 = GetMask(object2->type, object2->rotdir, size2);
+   pbyte pm1 = GetMask(object1->type, dir1, size1);
+   pbyte pm2 = GetMask(object2->type, dir2, size2);
 
    int oy1 = y - y1; // determines offset into object (and mask) where the bounding boxes touch
    int oy2 = y - y2;
@@ -1988,7 +1980,7 @@ void GameLoop() {
 #endif
    while (ProcessEvents()) {
 #ifdef TIMEGAMELOOP
-      s = startTimer();
+      Ticks = BegTimer();
 #endif
       UpdateTimers();
       CheckPause();
@@ -2028,12 +2020,12 @@ void GameLoop() {
 #ifdef TIMEGAMELOOP
       counter++;
       numTimeSlices++;
-      totalTime += stopTimer(s);
+      totalTime += EndTimer(Ticks);
       if (counter == 60) {
          snprintf(timebuff, sizeof(timebuff) - 1, "%d %12.8f ", numTimeSlices, totalTime/numTimeSlices/1000000);
          counter = 0;
       }
-      s = startTimer();
+      Ticks = BegTimer();
 #endif
    }
 }
