@@ -235,12 +235,12 @@ extern int errorCount;
 extern FILE *dbf;
 
 // consts
-const char *texturenames[NUMTEXTURES] = { "images/starfield.png", "images/text.png", "images/playership.png", "images/debug.png",
-   "images/a1.png", "images/a2.png", "images/a3.png", "images/a4.png", "images/bullet.png", "images/smallship.png", "images/explosion0.png",
-   "images/explosion1.png", "images/explosion2.png", "images/explosion3.png", "images/alien.png"
+const char *texturenames[NUMTEXTURES] = { "Images/starfield.png", "Images/text.png", "Images/playership.png", "Images/debug.png",
+   "Images/a1.png", "Images/a2.png", "Images/a3.png", "Images/a4.png", "Images/bullet.png", "Images/smallship.png", "Images/explosion0.png",
+   "Images/explosion1.png", "Images/explosion2.png", "Images/explosion3.png", "Images/alien.png"
 };
 const char *highscoreFN = { "highscores.txt" };
-const char *soundnames[NUMSOUNDS] = { "sounds/thrust.wav", "sounds/cannon.wav", "sounds/explosion1.wav", "sounds/explosion2.wav" };
+const char *soundnames[NUMSOUNDS] = { "Sounds/thrust.wav", "Sounds/cannon.wav", "Sounds/explosion1.wav", "Sounds/explosion2.wav" };
 
 const int explosionSizes[4] = { 128, 128, 128, 64 };
 const int sizes[4] = { 280, 140, 70, 35 };
@@ -344,13 +344,13 @@ int LoadMask(char *filename, int size, int number, char *mask) {
 // Load all masks if any return 0 then failed to load so exit
 int LoadMasks() {
    maskErrorFile = NULL;
-   if (!LoadMask("bullet.msk", 3, 1, &bulletmask[0][0][0])) return 0; // playership
-   if (!LoadMask("playership.msk", 64, 24, &plmask[0][0][0])) return 0; // playership
-   if (!LoadMask("am1.msk", 280, 24, &a1mask[0][0][0])) return 0;
-   if (!LoadMask("am2.msk", 140, 24, &a2mask[0][0][0])) return 0;
-   if (!LoadMask("am3.msk", 70, 24, &a3mask[0][0][0])) return 0;
-   if (!LoadMask("alien.msk", 64, 1, &alienmask[0][0])) return 0;
-   return LoadMask("am4.msk", 35, 24, &a4mask[0][0][0]);
+   if (!LoadMask("Masks/bullet.msk", 3, 1, &bulletmask[0][0][0])) return 0; // playership
+   if (!LoadMask("Masks/playership.msk", 64, 24, &plmask[0][0][0])) return 0; // playership
+   if (!LoadMask("Masks/am1.msk", 280, 24, &a1mask[0][0][0])) return 0;
+   if (!LoadMask("Masks/am2.msk", 140, 24, &a2mask[0][0][0])) return 0;
+   if (!LoadMask("Masks/am3.msk", 70, 24, &a3mask[0][0][0])) return 0;
+   if (!LoadMask("Masks/alien.msk", 64, 1, &alienmask[0][0])) return 0;
+   return LoadMask("Masks/am4.msk", 35, 24, &a4mask[0][0][0]);
 }
 
 void ClearCellList() {
