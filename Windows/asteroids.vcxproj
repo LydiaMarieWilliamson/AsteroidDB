@@ -19,15 +19,15 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="asteroids.c" />
-    <ClCompile Include="hr_time.c" />
-    <ClCompile Include="levels.c" />
-    <ClCompile Include="lib.c" />
+    <ClCompile Include="Rocks.c" />
+    <ClCompile Include="Timer.c" />
+    <ClCompile Include="Levels.c" />
+    <ClCompile Include="Log.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="hr_time.h" />
-    <ClInclude Include="levels.h" />
-    <ClInclude Include="lib.h" />
+    <ClInclude Include="Timer.h" />
+    <ClInclude Include="Levels.h" />
+    <ClInclude Include="Log.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

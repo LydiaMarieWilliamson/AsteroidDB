@@ -1,4 +1,10 @@
-#pragma once
+#ifndef OnceOnlyLevels_h
+#define OnceOnlyLevels_h
+
+#if 0
+#   pragma once // Still needed for the Windows version?
+#endif
+
 struct level {
    int nums[4]; // how many of each size of asteroid
    int aliens; // how many aliens
@@ -6,3 +12,5 @@ struct level {
 };
 
 extern struct level levels[50];
+
+#endif // OnceOnly

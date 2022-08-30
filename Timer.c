@@ -1,7 +1,4 @@
-#ifndef hr_timer
-#   include "hr_time.h"
-#   define hr_timer
-#endif
+#include "Timer.h"
 
 #if 1 // SDL-generic.
 static inline stopWatch PerformanceCounter(void) {

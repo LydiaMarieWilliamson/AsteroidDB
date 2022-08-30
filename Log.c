@@ -1,10 +1,6 @@
-#ifndef lib
-#   include <stdio.h>
-#   include <stdlib.h>
-#   include "lib.h"
-#   include <stdio.h>
-#   define lib
-#endif
+#include <stdio.h>
+#include <stdlib.h>
+#include "Log.h"
 
 int errorCount = 0;
 FILE *dbf;
@@ -20,7 +16,7 @@ int Random(int max) {
 // Log Single errors
 void LogError(char *msg) {
    FILE *err;
-   err = fopen("errorlog.txt", "a");
+   err = fopen("ErrorLog.txt", "a");
    printf("%s\n", msg);
    fclose(err);
    errorCount++;
@@ -29,7 +25,7 @@ void LogError(char *msg) {
 // Log Errors with two parameters
 void LogError2(const char *msg1, const char *msg2) {
    FILE *err;
-   err = fopen("errorlog.txt", "a");
+   err = fopen("ErrorLog.txt", "a");
    fprintf(err, "%s %s\n", msg1, msg2);
    fclose(err);
    errorCount++;
@@ -53,7 +49,7 @@ char *sltoa(int n) {
 }
 
 void InitLogging(char *filename) {
-   dbf = fopen("biglog.txt", "wt");
+   dbf = fopen("BigLog.txt", "wt");
 }
 
 void CloseLogging() {

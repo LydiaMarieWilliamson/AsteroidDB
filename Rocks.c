@@ -4,9 +4,9 @@
 #include <SDL2/SDL_mixer.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "hr_time.h"
-#include "lib.h"
-#include "levels.h"
+#include "Timer.h"
+#include "Log.h"
+#include "Levels.h"
 
 // Debugging
 //#define SHOWOVERLAP    // Comment this out for normal play, uncomment to show collisions
@@ -235,12 +235,12 @@ extern int errorCount;
 extern FILE *dbf;
 
 // consts
-const char *texturenames[NUMTEXTURES] = { "Images/starfield.png", "Images/text.png", "Images/playership.png", "Images/debug.png",
-   "Images/a1.png", "Images/a2.png", "Images/a3.png", "Images/a4.png", "Images/bullet.png", "Images/smallship.png", "Images/explosion0.png",
-   "Images/explosion1.png", "Images/explosion2.png", "Images/explosion3.png", "Images/alien.png"
+const char *texturenames[NUMTEXTURES] = { "Images/Space.png", "Images/Text.png", "Images/Ship.png", "Images/Debug.png",
+   "Images/Rock0.png", "Images/Rock1.png", "Images/Rock2.png", "Images/Rock3.png", "Images/Pea.png", "Images/Pod.png", "Images/Boom0.png",
+   "Images/Boom1.png", "Images/Boom2.png", "Images/Boom3.png", "Images/Alien.png"
 };
-const char *highscoreFN = { "highscores.txt" };
-const char *soundnames[NUMSOUNDS] = { "Sounds/thrust.wav", "Sounds/cannon.wav", "Sounds/explosion1.wav", "Sounds/explosion2.wav" };
+const char *highscoreFN = { "HiScores.txt" };
+const char *soundnames[NUMSOUNDS] = { "Sounds/Push.wav", "Sounds/Fire.wav", "Sounds/Boom0.wav", "Sounds/Boom1.wav" };
 
 const int explosionSizes[4] = { 128, 128, 128, 64 };
 const int sizes[4] = { 280, 140, 70, 35 };
@@ -344,13 +344,13 @@ int LoadMask(char *filename, int size, int number, char *mask) {
 // Load all masks if any return 0 then failed to load so exit
 int LoadMasks() {
    maskErrorFile = NULL;
-   if (!LoadMask("Masks/bullet.msk", 3, 1, bulletmask)) return 0; // playership
-   if (!LoadMask("Masks/playership.msk", 64, 24, plmask)) return 0; // playership
-   if (!LoadMask("Masks/am1.msk", 280, 24, a1mask)) return 0;
-   if (!LoadMask("Masks/am2.msk", 140, 24, a2mask)) return 0;
-   if (!LoadMask("Masks/am3.msk", 70, 24, a3mask)) return 0;
-   if (!LoadMask("Masks/alien.msk", 64, 1, alienmask)) return 0;
-   return LoadMask("Masks/am4.msk", 35, 24, a4mask);
+   if (!LoadMask("Masks/Pea.msk", 3, 1, bulletmask)) return 0; // playership
+   if (!LoadMask("Masks/Ship.msk", 64, 24, plmask)) return 0; // playership
+   if (!LoadMask("Masks/Rock0.msk", 280, 24, a1mask)) return 0;
+   if (!LoadMask("Masks/Rock1.msk", 140, 24, a2mask)) return 0;
+   if (!LoadMask("Masks/Rock2.msk", 70, 24, a3mask)) return 0;
+   if (!LoadMask("Masks/Alien.msk", 64, 1, alienmask)) return 0;
+   return LoadMask("Masks/Rock3.msk", 35, 24, a4mask);
 }
 
 void ClearCellList() {
@@ -429,7 +429,7 @@ void AddTextSpriteInt(int value, int y, int textfactor) {
    AddTextSpriteString(sltoa(value), y, textfactor);
 }
 
-// initialises data but possibly gets overwritten when highscores.txt file is read in in ReadhighScores()
+// initialises data but possibly gets overwritten when HiScores.txt file is read in in ReadhighScores()
 void InitHighScores() {
    memset(highscores, 0, sizeof(highscores));
    strncpy(highscores[0].initials, "DHB", 4);
@@ -2114,7 +2114,7 @@ void CheckHighScore() {
 }
 
 int main(int argc, char *args[]) {
-//InitLogging("biglog.txt");
+//InitLogging("BigLog.txt");
    InitSetup();
    if (errorCount) {
       return -1;

@@ -15,27 +15,27 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="hr_time.c">
+    <ClCompile Include="Timer.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="lib.c">
+    <ClCompile Include="Log.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="levels.c">
+    <ClCompile Include="Levels.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="asteroids.c">
+    <ClCompile Include="Rocks.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="hr_time.h">
+    <ClInclude Include="Timer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="lib.h">
+    <ClInclude Include="Log.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="levels.h">
+    <ClInclude Include="Levels.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
