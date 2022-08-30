@@ -2,8 +2,6 @@
 #   include <stdio.h>
 #   include <stdlib.h>
 #   include "lib.h"
-#   include <windows.h>
-#   include <tchar.h>
 #   include <stdio.h>
 #   define lib
 #endif
@@ -22,7 +20,7 @@ int Random(int max) {
 // Log Single errors
 void LogError(char *msg) {
    FILE *err;
-   int error = fopen_s(&err, "errorlog.txt", "a");
+   err = fopen("errorlog.txt", "a");
    printf("%s\n", msg);
    fclose(err);
    errorCount++;
@@ -31,31 +29,31 @@ void LogError(char *msg) {
 // Log Errors with two parameters
 void LogError2(const char *msg1, const char *msg2) {
    FILE *err;
-   int error = fopen_s(&err, "errorlog.txt", "a");
-   fprintf_s(err, "%s %s\n", msg1, msg2);
+   err = fopen("errorlog.txt", "a");
+   fprintf(err, "%s %s\n", msg1, msg2);
    fclose(err);
    errorCount++;
 }
 
 void l2(char *loc, char *msg) {
-//fprintf_s(dbf, "%s,%s\n", loc, msg);
+//fprintf(dbf, "%s,%s\n", loc, msg);
 }
 
 void l(char *loc) {
-//fprintf_s(dbf, "%s\n", loc);
+//fprintf(dbf, "%s\n", loc);
 }
 
 void ln(char *loc, char *msg, int n) {
-//fprintf_s(dbf, "%s,%s,%s\n", loc, msg, sltoa(n));
+//fprintf(dbf, "%s,%s,%s\n", loc, msg, sltoa(n));
 }
 
 char *sltoa(int n) {
-   _ltoa_s(n, convbuff, sizeof(convbuff), 10);
+   snprintf(convbuff, sizeof(convbuff), "%d", n);
    return convbuff;
 }
 
 void InitLogging(char *filename) {
-   int error = fopen_s(&dbf, "biglog.txt", "wt");
+   dbf = fopen("biglog.txt", "wt");
 }
 
 void CloseLogging() {

@@ -5,4 +5,4 @@ struct level {
    float factor; // from 1.0 to 1.5 - multiply astereoid speed by this
 };
 
-struct level levels[50];
+extern struct level levels[50];

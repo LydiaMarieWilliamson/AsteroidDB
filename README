@@ -8,3 +8,7 @@ There is now a blog about C and Games programming and accompanying the book at:
 
 The original source files are asteroids_ch48.zip and LICENSE (as well as information contained in its README), under
 	https://github.com/David-H-Bolton/LearnC
+
+The revised code has been made Linux-compatible.
+The original Windows-related files have been moved aside for now.
+The refurbished code might later be ported back to Windows.

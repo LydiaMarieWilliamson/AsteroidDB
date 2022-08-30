@@ -1,7 +1,7 @@
 #include <time.h>
-#include "SDL.h" // All SDL Applications need this
-#include "SDL_image.h"
-#include "SDL_mixer.h"
+#include <SDL2/SDL.h> // All SDL Applications need this
+#include <SDL2/SDL_image.h>
+#include <SDL2/SDL_mixer.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "hr_time.h"
@@ -83,7 +83,7 @@
 // typedefs
 typedef struct firstpart *pfirstpart;
 typedef pfirstpart ptrarray[100]; // 100 pointers to a firstpart
-typedef byte *pbyte;
+typedef unsigned char byte, *pbyte;
 
 // enums
 enum ObjectType { tAsteroid, tBullet, tPlayer, tAlien };
@@ -208,13 +208,13 @@ char timebuff[50]; // used for timing
 char buffer[100], buffer2[100];
 float thrustx[24];
 float thrusty[24];
-byte bulletmask[1][3][3];
-byte plmask[24][64][64];
-byte a1mask[24][280][280];
-byte a2mask[24][140][140];
-byte a3mask[24][70][70];
-byte a4mask[24][35][35];
-byte alienmask[64][64];
+byte bulletmask[1*3*3];
+byte plmask[24*64*64];
+byte a1mask[24*280*280];
+byte a2mask[24*140*140];
+byte a3mask[24*70*70];
+byte a4mask[24*35*35];
+byte alienmask[64*64];
 
 // struct variables
 struct Cell cells[CELLX][CELLY];
@@ -253,7 +253,7 @@ const int ydir[8] = { -1, -1, 0, 1, 1, 1, 0, -1 };
 // Sets Window caption according to state - eg in debug mode or showing fps
 void SetCaption(char *msg) {
    if (showFPS) {
-      sprintf_s(buffer, sizeof(buffer), "Fps = %d #Asteroids =%d %s", frameCount, numAsteroids, msg);
+      snprintf(buffer, sizeof(buffer), "Fps = %d #Asteroids =%d %s", frameCount, numAsteroids, msg);
       SDL_SetWindowTitle(screen, buffer);
    } else {
       SDL_SetWindowTitle(screen, msg);
@@ -334,23 +334,23 @@ int LoadMask(char *filename, int size, int number, char *mask) {
    FILE *fmask;
    maskErrorFile = filename;
    int sizeofmask = size*size*number;
-   int error = fopen_s(&fmask, filename, "rb");
-   if (error != 0) return 0;
-   int numread = fread_s(mask, sizeofmask, sizeofmask, 1, fmask);
+   fmask = fopen(filename, "rb");
+   if (fmask == NULL) return 0;
+   int numread = fread(mask, 1, sizeofmask, fmask);
    fclose(fmask);
-   return numread == 1 ? 1 : 0;
+   return numread == sizeofmask;
 }
 
 // Load all masks if any return 0 then failed to load so exit
 int LoadMasks() {
    maskErrorFile = NULL;
-   if (!LoadMask("Masks/bullet.msk", 3, 1, &bulletmask[0][0][0])) return 0; // playership
-   if (!LoadMask("Masks/playership.msk", 64, 24, &plmask[0][0][0])) return 0; // playership
-   if (!LoadMask("Masks/am1.msk", 280, 24, &a1mask[0][0][0])) return 0;
-   if (!LoadMask("Masks/am2.msk", 140, 24, &a2mask[0][0][0])) return 0;
-   if (!LoadMask("Masks/am3.msk", 70, 24, &a3mask[0][0][0])) return 0;
-   if (!LoadMask("Masks/alien.msk", 64, 1, &alienmask[0][0])) return 0;
-   return LoadMask("Masks/am4.msk", 35, 24, &a4mask[0][0][0]);
+   if (!LoadMask("Masks/bullet.msk", 3, 1, bulletmask)) return 0; // playership
+   if (!LoadMask("Masks/playership.msk", 64, 24, plmask)) return 0; // playership
+   if (!LoadMask("Masks/am1.msk", 280, 24, a1mask)) return 0;
+   if (!LoadMask("Masks/am2.msk", 140, 24, a2mask)) return 0;
+   if (!LoadMask("Masks/am3.msk", 70, 24, a3mask)) return 0;
+   if (!LoadMask("Masks/alien.msk", 64, 1, alienmask)) return 0;
+   return LoadMask("Masks/am4.msk", 35, 24, a4mask);
 }
 
 void ClearCellList() {
@@ -413,7 +413,7 @@ void AddTextSpriteAt(char *value, int x, int y, int textfactor) {
    psprite->y = y;
    psprite->active = 60;
    psprite->textFactor = textfactor;
-   strcpy_s(psprite->message, sizeof(psprite->message), value);
+   strncpy(psprite->message, value, sizeof(psprite->message));
    numsprites++;
 }
 
@@ -432,7 +432,7 @@ void AddTextSpriteInt(int value, int y, int textfactor) {
 // initialises data but possibly gets overwritten when highscores.txt file is read in in ReadhighScores()
 void InitHighScores() {
    memset(highscores, 0, sizeof(highscores));
-   strcpy_s(highscores[0].initials, 4, "DHB");
+   strncpy(highscores[0].initials, "DHB", 4);
    highscores[0].score = 500;
    highscores[0].d = 1;
    highscores[0].m = 1;
@@ -454,7 +454,7 @@ int StrConv(char *line, int start, int len) {
 }
 
 // copies len chars from line into starting from start
-// There's no terminating 0 so can't use strcpy_s
+// There's no terminating 0 so can't use strncpy
 void StrCopyTo(char *dest, char *line, int start, int len) {
    for (int i = 0; i < len; i++) {
       dest[i] = line[start++];
@@ -471,8 +471,8 @@ void ReadHighScores() {
    InitHighScores();
    FILE *fscores;
    char line[25]; // lonhg enough for 19 char string plus trailing 0
-   int error = fopen_s(&fscores, highscoreFN, "rt");
-   if (error != 0) return; // error reading
+   fscores = fopen(highscoreFN, "rt");
+   if (fscores == NULL) return; // error reading
    numHighScores = 0;
    while (fgets(line, sizeof(line), fscores)) {
       int len = strlen(line);
@@ -496,8 +496,8 @@ void ReadHighScores() {
 void WriteHighScores() {
    FILE *fscores;
    char line[20];
-   int error = fopen_s(&fscores, highscoreFN, "wt");
-   if (error != 0) return;
+   fscores = fopen(highscoreFN, "wt");
+   if (fscores == NULL) return;
    numHighScores = 0;
    for (int i = 0; i < NUMSCORES; i++) {
       if (highscores[i].score) {
@@ -609,7 +609,7 @@ void UpdateCaption() {
 #ifdef TIMEGAMELOOP
    SetCaption(timebuff);
 #else
-   sprintf_s(buffer2, sizeof(buffer2), "%10.6f", getElapsedTime(&s));
+   snprintf(buffer2, sizeof(buffer2), "%10.6f", stopTimer(s));
    tickCount = SDL_GetTicks();
 
    if (tickCount - lastTick >= 1000) {
@@ -707,9 +707,9 @@ void DrawPlayerShip() {
    spriterect.h = 66;
    SDL_RenderCopy(renderer, textures[TEXTUREDEBUG], &spriterect, &target);
 
-   sprintf_s(buff, sizeof(buff), "(%6.4f,%6.4f) Dir= %i", Player.x, Player.y, Player.dir);
+   snprintf(buff, sizeof(buff), "(%6.4f,%6.4f) Dir= %i", Player.x, Player.y, Player.dir);
    TextAt((int)Player.x - 50, (int)Player.y + 66, buff, 1);
-   sprintf_s(buff, sizeof(buff), "(%6.4f,%6.4f)", Player.vx, Player.vy);
+   snprintf(buff, sizeof(buff), "(%6.4f,%6.4f)", Player.vx, Player.vy);
    TextAt((int)Player.x - 50, (int)Player.y + 90, buff, 1);
 }
 
@@ -744,9 +744,9 @@ void DrawAlienShips() {
       spriterect.h = ALIENSHIPHEIGHT;
       SDL_RenderCopy(renderer, textures[TEXTUREDEBUG], &spriterect, &target);
 
-      sprintf_s(buff, sizeof(buff), "(%6.4f,%6.4f)", palien->x, palien->y);
+      snprintf(buff, sizeof(buff), "(%6.4f,%6.4f)", palien->x, palien->y);
       TextAt((int)palien->x - 50, (int)palien->y + 66, buff, 1);
-      sprintf_s(buff, sizeof(buff), "(%6.4f,%6.4f)", palien->xvel, palien->yvel);
+      snprintf(buff, sizeof(buff), "(%6.4f,%6.4f)", palien->xvel, palien->yvel);
       TextAt((int)palien->x - 50, (int)palien->y + 90, buff, 1);
    }
 }
@@ -796,7 +796,7 @@ void DrawBullets() {
          target.y = (int)bullets[i].y;
          SDL_RenderCopy(renderer, textures[TEXTUREBULLET], &spriterect, &target);
          if (debugFlag) {
-            sprintf_s(buff, 10, "%i", bullets[i].ttl);
+            snprintf(buff, 10, "%i", bullets[i].ttl);
             TextAt((int)bullets[i].x + 5, (int)bullets[i].y, buff, 1);
          }
       }
@@ -822,7 +822,7 @@ void DrawExplosions() {
          SDL_RenderCopy(renderer, textures[TEXTUREEXPLOSION + dimension], &spriterect, &target);
          if (debugFlag) {
             char buff[15];
-            sprintf_s(buff, sizeof(buff), "X %i", explosions[i].frame);
+            snprintf(buff, sizeof(buff), "X %i", explosions[i].frame);
             TextAt(target.x + 10, target.y + EXPLOSIONSIZE, buff, 1);
          }
       }
@@ -833,7 +833,7 @@ void DrawExplosions() {
 void DrawScoreAndLives() {
    char scorebuffer[10];
    SDL_Rect destr;
-   sprintf_s(scorebuffer, sizeof(scorebuffer), "%i", score);
+   snprintf(scorebuffer, sizeof(scorebuffer), "%i", score);
    TextAt(25, SCREENHEIGHT - 30, scorebuffer, 1);
    destr.h = 33;
    destr.w = 24;
@@ -876,7 +876,6 @@ void DrawEverything() {
    DrawScoreAndLives();
    DrawTextSprites();
    DrawPauseMessage("Paused");
-   stopTimer(&s);
    UpdateCaption();
 }
 
@@ -889,16 +888,16 @@ void RenderEverything() {
 
 void DrawLevelStart() {
    char buffer[30];
-   sprintf_s(buffer, sizeof(buffer), "Level %d", gameLevel + 1);
+   snprintf(buffer, sizeof(buffer), "Level %d", gameLevel + 1);
    AddTextSpriteString(buffer, 380, 3);
 
    switch (Player.lives) {
       case 1:
-         sprintf_s(buffer, sizeof(buffer), "Last Life!");
+         snprintf(buffer, sizeof(buffer), "Last Life!");
          break;
       case 2:
       case 3:
-         sprintf_s(buffer, sizeof(buffer), "Lives left: %d", Player.lives);
+         snprintf(buffer, sizeof(buffer), "Lives left: %d", Player.lives);
          break;
    }
    AddTextSpriteString(buffer, 440, 3);
@@ -1576,26 +1575,27 @@ void DestroyObject(pfirstpart object) {
 
 // Returns a pointer to the top left byte of the correct mask depending on object type
 pbyte GetMask(int type, int rotation, int size) {
+   int offset = rotation*size*size;
    switch (type) {
       case tAsteroid: // asteroid
       {
          switch (size) {
             case 280:
-               return (pbyte)&a1mask[rotation];
+               return a1mask + offset;
             case 140:
-               return (pbyte)&a2mask[rotation];
+               return a2mask + offset;
             case 70:
-               return (pbyte)&a3mask[rotation];
+               return a3mask + offset;
             case 35:
-               return (pbyte)&a4mask[rotation];
+               return a4mask + offset;
          }
       };
       case tBullet: // bullet
-         return (pbyte)&bulletmask;
+         return bulletmask /* + offset */ ;
       case tPlayer: // player
-         return (pbyte)&plmask[rotation];
+         return plmask + offset;
       case tAlien:
-         return (pbyte)&alienmask;
+         return alienmask /* + offset */ ;
    }
    return 0; // null - should never get here!
 }
@@ -1949,9 +1949,9 @@ void DisplayHighScores() {
       for (int i = 0; i < NUMSCORES; i++) {
          struct HighScoreEntry *entry = &highscores[i];
          if (entry->score) {
-            sprintf_s(buffer, sizeof(buffer) - 1, "%02d/%02d/%4d    %3s   %02d   %06d", entry->d, entry->m, entry->y, entry->initials, entry->level, entry->score);
+            snprintf(buffer, sizeof(buffer) - 1, "%02d/%02d/%4d    %3s   %02d   %06d", entry->d, entry->m, entry->y, entry->initials, entry->level, entry->score);
          } else {
-            sprintf_s(buffer, sizeof(buffer) - 1, "--/--/----    ---   --   000000");
+            snprintf(buffer, sizeof(buffer) - 1, "--/--/----    ---   --   000000");
          }
          if (flashIndex != i) {
             TextAt(345, y, buffer, 1.0f);
@@ -1988,7 +1988,7 @@ void GameLoop() {
 #endif
    while (ProcessEvents()) {
 #ifdef TIMEGAMELOOP
-      startTimer(&s);
+      s = startTimer();
 #endif
       UpdateTimers();
       CheckPause();
@@ -2028,25 +2028,24 @@ void GameLoop() {
 #ifdef TIMEGAMELOOP
       counter++;
       numTimeSlices++;
-      stopTimer(&s);
-      totalTime += getElapsedTime(&s);
+      totalTime += stopTimer(s);
       if (counter == 60) {
-         sprintf_s(timebuff, sizeof(timebuff) - 1, "%d %12.8f ", numTimeSlices, totalTime/numTimeSlices/1000000);
+         snprintf(timebuff, sizeof(timebuff) - 1, "%d %12.8f ", numTimeSlices, totalTime/numTimeSlices/1000000);
          counter = 0;
       }
-      startTimer(&s);
+      s = startTimer();
 #endif
    }
 }
 
 void SetTodaysDate(struct HighScoreEntry *entry) {
    time_t t = time(NULL);
-   struct tm rawtime;
+   struct tm *rawtimep;
    time(&t);
-   if (localtime_s(&rawtime, &t) == 0) {
-      entry->d = rawtime.tm_mday;
-      entry->m = rawtime.tm_mon + 1;
-      entry->y = rawtime.tm_year + 1900;
+   if ((rawtimep = localtime(&t)) != NULL) {
+      entry->d = rawtimep->tm_mday;
+      entry->m = rawtimep->tm_mon + 1;
+      entry->y = rawtimep->tm_year + 1900;
    }
 }
 
